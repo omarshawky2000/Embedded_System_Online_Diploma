@@ -1,0 +1,19 @@
+//Protection from multiple declarations 
+#ifndef DC_H_
+#define DC_H_
+
+#include "state.h"
+//Define states
+enum {
+    DC_Idle,
+    DC_Busy
+} DC_state_id;
+
+//Declares state functions DC
+STATE_define(DC_idle);
+STATE_define(DC_busy);
+
+extern void (*CA_state)();
+void US_Get_distance(int * Distance);
+
+#endif

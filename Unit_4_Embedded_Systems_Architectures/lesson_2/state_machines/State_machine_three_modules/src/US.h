@@ -1,0 +1,28 @@
+//Protection from multiple declarations 
+#ifndef US_H_
+#define US_H_
+
+#include "state.h"
+#include "stdio.h"
+#include "stdlib.h"
+
+//Define states
+enum {
+    US_Idle,
+    US_Busy
+} US_state_id;
+
+//Declares state functions US
+STATE_define(US_idle);
+STATE_define(US_busy);
+
+
+void US_init(void);
+int US_Get_distance_random(int l , int r , int count);
+void US_Get_distance(int * Distance);
+
+
+//State Pointer to function
+extern void (*US_state)();
+
+#endif

@@ -1,0 +1,8 @@
+16:48:15 **** Incremental Build of configuration Debug for project State_machine ****
+Info: Internal Builder is used for build
+gcc -o State_machine.exe "src\\CA.o" "src\\main.o" 
+c:/mingw/bin/../lib/gcc/mingw32/6.3.0/../../../../mingw32/bin/ld.exe: cannot open output file State_machine.exe: Permission denied
+collect2.exe: error: ld returned 1 exit status
+
+16:48:16 Build Finished (took 167ms)
+

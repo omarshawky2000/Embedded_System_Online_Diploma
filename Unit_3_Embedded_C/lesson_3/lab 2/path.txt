@@ -1,0 +1,8 @@
+ export PATH=/c/yagarto-20121222/bin/:$PATH
+
+arm-none-eabi-gcc.exe -c -mcpu=arm926ej-s -I. app.c -o app.o    //Command to compile till object files
+arm-none-eabi-gcc.exe -c -mcpu=arm926ej-s -I. uart.c -o uart.o	//Command to compile till object files
+
+
+
+

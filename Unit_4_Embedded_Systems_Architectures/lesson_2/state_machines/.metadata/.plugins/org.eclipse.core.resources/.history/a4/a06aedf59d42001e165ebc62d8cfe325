@@ -1,0 +1,65 @@
+
+#include "DC.h"
+
+//Variables
+int DC_speed = 0 ;
+
+//STATE Pointer to function
+void (*DC_state)();
+
+void DC_init(void){
+	//init the motor required registers
+	printf("DC motor is ready \n");
+}
+
+void DC_motor(int s){
+	DC_speed = s;
+
+}
+
+STATE_define(DC_idle)
+{
+	//State name
+	DC_state_id = DC_Idle ;
+
+	//State Action
+	DC_speed = 0 ;
+
+	//Event Check
+	US_Get_distance(&DC_distance);
+	(DC_distance <= DC_threshold) ? ( DC_state = STATE(DC_idle)) : ( DC_state = STATE(DC_busy));
+	printf("DC_waiting state : distance = %d , speed = %d \n", DC_distance , DC_speed );
+
+}
+
+STATE_define(DC_busy)
+{
+	//State name
+	DC_state_id = DC_Busy ;
+
+	//State Action
+	DC_speed = 10 ;
+
+	//Event Check
+	US_Get_distance(&DC_distance);
+	(DC_distance <= DC_threshold) ? ( DC_state = STATE(DC_waiting)) : ( DC_state = STATE(DC_driving));
+
+	printf("DC_waiting state : distance = %d , speed = %d \n", DC_distance , DC_speed );
+}
+
+int US_Get_distance_random(int l , int r , int count)
+{
+	//this will generate random number in range l and r
+	int i;
+	int rand_num = 0;
+	for( i = 0 ; i < count ; i++ ){
+		rand_num = ( rand() % (r - l + 1) ) + 1 ;
+	} 
+	return rand_num ;
+	
+} 
+
+void US_Get_distance(int * Distance)
+{
+	* Distance = US_Get_distance_random( 0 , 10 , 4);
+} 

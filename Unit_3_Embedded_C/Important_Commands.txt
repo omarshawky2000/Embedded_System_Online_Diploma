@@ -1,0 +1,100 @@
+ /* Import the toolchain path */
+
+ export PATH=/c/yagarto-20121222/bin/:$PATH
+
+##########################################################################################################################
+/* Cross toolchain commands */
+##########################################################################################################################
+/* Arguements for the toolchain */
+  -----------------------------------------------------------------------
+  for GCC:
+  ----------
+  -E                       Preprocess only; do not compile, assemble or link
+  -S                       Compile only; do not assemble or link
+  -c                       Compile and assemble, but do not link
+  -o <file>                Place the output into <file>
+  -mcpu=<cpu name>         assemble for CPU <cpu name>
+  -I.                      link with all files found in the directory
+  -g                       leave debug information in the object file (Can be used for gcc and assembler)
+  ------------------------------------------------------------------------------------------------------------------------
+  for objdump:
+  ------------
+  -a, --archive-headers    Display archive header information
+  -f, --file-headers       Display the contents of the overall file header
+  -p, --private-headers    Display object format specific file header contents
+  -P, --private=OPT,OPT... Display object format specific contents
+  -h, --[section-]headers  Display the contents of the section headers
+  -x, --all-headers        Display the contents of all headers
+  -d, --disassemble        Display assembler contents of executable sections
+  -D, --disassemble-all    Display assembler contents of all sections
+  -S, --source             Intermix source code with disassembly
+  -s, --full-contents      Display the full contents of all sections requested
+  -g, --debugging          Display debug information in object file
+  -e, --debugging-tags     Display debug information using ctags style
+  -G, --stabs              Display (in raw form) any STABS info in the file
+--------------------------------------------------------------------------------------------------------------------------
+  for linker:
+  ------------
+  -map="file_name".map     Output a map file for all the layout of different sections
+--------------------------------------------------------------------------------------------------------------------------
+
+
+/*Command to compile till object files (with debug info and adding all header files)*/
+
+arm-none-eabi-gcc.exe -c -g  -mcpu=arm926ej-s -I. app.c -o app.o 
+
+##########################################################################################################################
+/*Command to compile till object files (with debug info and adding all header files) */
+
+arm-none-eabi-gcc.exe -c -g  -mcpu=arm926ej-s -I. uart.c -o uart.o	
+                      
+##########################################################################################################################
+/* Command to assemble till object files */
+
+arm-none-eabi-as.exe  -g  -mcpu=arm926ej-s startup.s -o startup.o	                        
+
+##########################################################################################################################
+/* Command to link the object files */
+
+arm-none-eabi-ld.exe  -T  linkerscript.ld startup.o uart.o app.o -o learn_in_depth.elf      
+
+##########################################################################################################################
+/* Command to convert .elf to .bin */
+
+arm-none-eabi-objcopy.exe  -O binary  learn_in_depth.elf learn_in_depth.bin                
+
+##########################################################################################################################
+/* Command to explore the sections of the object file */
+
+arm-none-eabi-objdump.exe  -h app.o       
+
+##########################################################################################################################
+/* Command to explore the symbols of the object file */
+
+arm-none-eabi-nm.exe app.o      
+
+##########################################################################################################################
+/* Command to read .elf file and find the entry point */
+
+arm-none-eabi-readelf.exe  -a learn_in_depth.elf   
+
+##########################################################################################################################                                              
+/* Command to remove all .o , .elf , .bin extentions */ 
+
+rm *.o *.bin *.elf    
+##########################################################################################################################
+
+
+Qemu
+----------------------------------
+Arguements :
+------------
+  -M                       Specify the machine for the simulator
+  -m                       Specify its memory size
+  -nographic               no GUI interface
+  -kernel                  select the binary that should run on the file
+                                      
+/* Command to run a binary file on Qemu */ 
+
+(Qemu Path)\qemu-system-arm.exe -M versatilepb -m 128M -nographic -kernel learn_in_depth.bin
+##########################################################################################################################

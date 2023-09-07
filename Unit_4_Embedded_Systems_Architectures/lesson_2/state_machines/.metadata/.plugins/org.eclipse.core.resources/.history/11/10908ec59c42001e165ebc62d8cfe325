@@ -1,0 +1,55 @@
+
+#include "US.h"
+
+//Variables
+int US_distance = 0 ;
+
+//STATE Pointer to function
+void (*US_state)();
+
+STATE_define(US_busy)
+{
+	//State name
+	US_state_id = US_Waiting ;
+
+	//State Action
+	US_speed = 0 ;
+
+	//Event Check
+	US_Get_distance(&US_distance);
+	(US_distance <= US_threshold) ? ( US_state = STATE(US_waiting)) : ( US_state = STATE(US_driving));
+	printf("US_waiting state : distance = %d , speed = %d \n", US_distance , US_speed );
+
+}
+
+STATE_define(US_driving)
+{
+	//State name
+	US_state_id = US_Driving ;
+
+	//State Action
+	US_speed = 10 ;
+
+	//Event Check
+	US_Get_distance(&US_distance);
+	(US_distance <= US_threshold) ? ( US_state = STATE(US_waiting)) : ( US_state = STATE(US_driving));
+
+	printf("US_waiting state : distance = %d , speed = %d \n", US_distance , US_speed );
+}
+
+int US_Get_distance_random(int l , int r , int count)
+{
+	//this will generate random number in range l and r
+	int i;
+	int rand_num = 0;
+	for( i = 0 ; i < count ; i++ ){
+		rand_num = ( rand() % (r - l + 1) ) + 1 ;
+	} 
+	return rand_num ;
+	
+} 
+
+void US_Get_distance(int * Distance)
+{
+	* Distance = US_Get_distance_random( 0 , 10 , 4);
+} 

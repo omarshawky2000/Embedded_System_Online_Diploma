@@ -1,0 +1,4 @@
+00000000 R const_variables
+00000000 D g_variables
+00000000 T main
+00000004 D R_ODR

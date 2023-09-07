@@ -1,0 +1,6 @@
+18:57:44 **** Incremental Build of configuration Debug for project State_machine_three_modules ****
+Info: Internal Builder is used for build
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -o "src\\CA.o" "..\\src\\CA.c" 
+gcc -o State_machine_three_modules.exe "src\\CA.o" "src\\DC.o" "src\\State_machine_three_modules.o" "src\\US.o" 
+Info: Nothing to build for State_machine_three_modules
+Info: Nothing to build for State_machine_three_modules
