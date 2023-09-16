@@ -1,0 +1,20 @@
+20:57:36 **** Incremental Build of configuration Debug for project EXTI ****
+make -j8 all 
+arm-none-eabi-gcc "../Src/main.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F1 -DSTM32F103C6Tx -c -I../Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/main.d" -MT"Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Src/main.o"
+../Src/main.c:100:6: warning: return type of 'main' is not 'int' [-Wmain]
+  100 | void main(void)
+      |      ^~~~
+arm-none-eabi-gcc -o "EXTI.elf" @"objects.list"   -mcpu=cortex-m3 -T"E:\Courses_Trainings\Embedded_Diploma\Assingments\Unit_6_Microcontroller_Architectures\lesson 4\lab1_Lesson4_Unit6\EXTI\STM32F103C6TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="EXTI.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: EXTI.elf
+ 
+arm-none-eabi-size   EXTI.elf 
+arm-none-eabi-objdump -h -S  EXTI.elf  > "EXTI.list"
+   text	   data	    bss	    dec	    hex	filename
+    808	      8	   1568	   2384	    950	EXTI.elf
+Finished building: default.size.stdout
+ 
+Finished building: EXTI.list
+ 
+
+20:57:37 Build Finished. 0 errors, 1 warnings. (took 874ms)
+

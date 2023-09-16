@@ -1,0 +1,8 @@
+00000000 T AA_init
+00000004 C AA_state
+00000001 C AA_state_id
+         U AlarmFlag
+         U Set_Alarm_actuator
+00000088 T ST_AA_alarmOFF
+00000058 T ST_AA_alarmON
+0000000c T ST_AA_waiting

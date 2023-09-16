@@ -1,0 +1,5 @@
+1 Omar Shawky 3.8 Physiology Ethics Math Chemistry Design Machines
+2 Sameh Saed 2.5 Machines Drawing Electronics Physics Circuits
+3 Mohamed Ahmed 3.3 Economics Finance Statistics Math English
+4 Seif Ashraf 2.8 Dynamics Biology Statics Sports Chemistry
+5 Karam Islam 3.2 Physics Math Chemistry Arabic English

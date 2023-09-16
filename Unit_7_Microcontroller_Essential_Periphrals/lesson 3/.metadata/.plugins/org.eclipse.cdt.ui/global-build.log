@@ -1,0 +1,20 @@
+11:48:37 **** Build of configuration Debug for project Lab1_Lesson3_Unit6 ****
+make -j8 all 
+arm-none-eabi-gcc -mcpu=cortex-m3 -g3 -DDEBUG -c -x assembler-with-cpp -MMD -MP -MF"Startup/startup_stm32f103c6tx.d" -MT"Startup/startup_stm32f103c6tx.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Startup/startup_stm32f103c6tx.o" "../Startup/startup_stm32f103c6tx.s"
+arm-none-eabi-gcc "../Src/main.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F1 -DSTM32F103C6Tx -c -I../Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/main.d" -MT"Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Src/main.o"
+arm-none-eabi-gcc "../Src/syscalls.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F1 -DSTM32F103C6Tx -c -I../Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/syscalls.d" -MT"Src/syscalls.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Src/syscalls.o"
+arm-none-eabi-gcc "../Src/sysmem.c" -mcpu=cortex-m3 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F1 -DSTM32F103C6Tx -c -I../Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/sysmem.d" -MT"Src/sysmem.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Src/sysmem.o"
+../Src/main.c:28:6: warning: return type of 'main' is not 'int' [-Wmain]
+   28 | void main(void)
+      |      ^~~~
+arm-none-eabi-gcc -o "Lab1_Lesson3_Unit6.elf" @"objects.list"   -mcpu=cortex-m3 -T"E:\Courses_Trainings\Embedded_Diploma\Assingments\Unit_6_Microcontroller_Architectures\lesson 3\Lab1_Lesson3_Unit6\STM32F103C6TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Lab1_Lesson3_Unit6.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Lab1_Lesson3_Unit6.elf
+ 
+arm-none-eabi-size   Lab1_Lesson3_Unit6.elf 
+arm-none-eabi-objdump -h -S  Lab1_Lesson3_Unit6.elf  > "Lab1_Lesson3_Unit6.list"
+   text	   data	    bss	    dec	    hex	filename
+    672	     12	   1564	   2248	    8c8	Lab1_Lesson3_Unit6.elf
+Finished building: default.size.stdout
+ 
+Finished building: Lab1_Lesson3_Unit6.list
+ 

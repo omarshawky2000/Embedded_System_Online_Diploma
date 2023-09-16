@@ -1,0 +1,5 @@
+../Src/main.c:51:6:clock_init	1
+../Src/main.c:61:6:gpio_init	1
+../Src/main.c:71:6:EXTI0_init	1
+../Src/main.c:91:6:EXTI0_IRQHandler	1
+../Src/main.c:100:6:main	1

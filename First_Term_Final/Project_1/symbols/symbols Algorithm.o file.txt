@@ -1,0 +1,9 @@
+00000004 C Al_state
+00000001 C Al_state_id
+         U alarmOFF
+         U alarmON
+00000000 B PVal
+00000000 R PVal_threshold
+00000000 T setPressureVal
+0000004c T ST_Al_comparing
+00000020 T ST_Al_waiting

@@ -1,0 +1,11 @@
+00000000 B AlarmFlag
+0000002c T alarmOFF
+00000000 T alarmON
+00000058 T AM_init
+00000004 C AM_state
+00000001 C AM_state_id
+00000000 R ATimer
+         U Delay
+00000064 T ST_AM_alarmOFF
+0000007c T ST_AM_alarmON
+000000a8 T ST_AM_waiting
