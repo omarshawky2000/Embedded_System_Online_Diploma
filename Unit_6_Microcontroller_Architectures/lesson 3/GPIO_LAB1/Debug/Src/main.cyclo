@@ -1,0 +1,3 @@
+../Src/main.c:38:6:clock_init	1
+../Src/main.c:48:6:gpio_init	1
+../Src/main.c:74:6:main	5

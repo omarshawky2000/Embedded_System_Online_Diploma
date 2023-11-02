@@ -1,0 +1,3 @@
+../HAL/keypad.c:12:6:delay_mss	3
+../HAL/keypad.c:19:6:Keypad_init	1
+../HAL/keypad.c:68:6:Keypad_getkey	25

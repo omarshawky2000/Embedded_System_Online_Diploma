@@ -1,0 +1,374 @@
+/*
+ * Stm32_F103C6_GPIO_Driver.c
+ *
+ *  Created on: Sep 26, 2023
+ *      Author: omar pc
+ */
+ #include "Stm32_F103C6_GPIO_Driver.h"
+ //========================================================================
+ //								PRIVATE PROTOTYPES
+ //========================================================================
+ uint8_t _FindPinNum (uint16_t PinNumber);
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_Init
+ * @Brief		- Initialize a GPIOx Pin Y According to Parameters in PinConfig
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @param(in)	- PinConfig: Structure where the configuration of the pins is stored.
+ * @retval		- NONE
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+
+
+void MCAL_GPIO_Init(GPIO_TypeDef* GPIOx , GPIO_PinConfig_t PinConfig)
+{
+	//Enable the RCC on the GPIO port
+
+	//Initialize the pin mode
+	uint8_t PINNUM = _FindPinNum(PinConfig.GPIO_PinNumber);
+	//Port Configuration register low GPIOx_CRL -> Configure pin 0 to pin 7
+	if(PinConfig.GPIO_PinNumber< GPIO_PIN_8)
+	{
+		switch(PinConfig.GPIO_MODE)
+		{
+			case GPIO_MODE_ANALOG:
+				GPIOx->CRL &= ~(0X3<<4*PINNUM);	//reset two bits in MODE
+				GPIOx->CRL &= ~(0XC<<4*PINNUM);   //reset two bits in CNF
+				break;
+
+			case GPIO_MODE_INPUT_FLO:
+				GPIOx->CRL &= ~(0X3<<4*PINNUM);	//reset two bits in MODE
+				GPIOx->CRL &= ~(0X8<<4*PINNUM);   //reset 2nd bit in CNF
+				GPIOx->CRL |=  (0X4<<4*PINNUM);   //set 1st bit in CNF
+				break;
+
+			case GPIO_MODE_INPUT_PU:
+				GPIOx->CRL &= ~(0X3<<4*PINNUM);	//reset two bits in MODE
+				GPIOx->CRL &= ~(0X4<<4*PINNUM);   //reset 1st bit in CNF
+				GPIOx->CRL |=  (0X8<<4*PINNUM);   //set 2nd bit in CNF
+				break;
+
+			case GPIO_MODE_INPUT_PD:
+				GPIOx->CRL &= ~(0X3<<4*PINNUM);	//reset two bits in MODE
+				GPIOx->CRL &= ~(0X4<<4*PINNUM);   //reset 1st bit in CNF
+				GPIOx->CRL |=  (0X8<<4*PINNUM);   //set 2nd bit in CNF
+				break;
+
+			case GPIO_MODE_OUTPUT_PP:
+				switch(PinConfig.GPIO_OUTPUT_SPEED)
+				{
+					case GPIO_SPEED_10M:
+						GPIOx->CRL &= ~(2<<4*PINNUM);	//reset 2nd bit in MODE
+						GPIOx->CRL |=  (1<<4*PINNUM);	//set 1st bit in MODE
+						break;
+					case GPIO_SPEED_2M:
+						GPIOx->CRL &= ~(1<<4*PINNUM);	//set 2nd bit in MODE
+						GPIOx->CRL |=  (2<<4*PINNUM);	//reset 1st bit in MODE
+						break;
+					case GPIO_SPEED_5M:
+						GPIOx->CRL |=  (3<<4*PINNUM);	//set the two bits in MODE
+						break;
+				}
+				GPIOx->CRL &= ~(0XC<<4*PINNUM);   //reset two bits in CNF
+				break;
+
+			case GPIO_MODE_OUTPUT_OD:
+				switch(PinConfig.GPIO_OUTPUT_SPEED)
+				{
+					case GPIO_SPEED_10M:
+						GPIOx->CRL &= ~(2<<4*PINNUM);	//reset 2nd bit in MODE
+						GPIOx->CRL |=  (1<<4*PINNUM);	//set 1st bit in MODE
+						break;
+					case GPIO_SPEED_2M:
+						GPIOx->CRL &= ~(1<<4*PINNUM);	//set 2nd bit in MODE
+						GPIOx->CRL |=  (2<<4*PINNUM);	//reset 1st bit in MODE
+						break;
+					case GPIO_SPEED_5M:
+						GPIOx->CRL |=  (3<<4*PINNUM);	//set the two bits in MODE
+						break;
+				}
+				GPIOx->CRL &= ~(0X8<<4*PINNUM);   //reset 2nd bits in CNF
+				GPIOx->CRL |=  (0X4<<4*PINNUM);   //set 1st bits in CNF
+				break;
+
+			case GPIO_MODE_OUTPUT_AF_PP:
+				switch(PinConfig.GPIO_OUTPUT_SPEED)
+					{
+						case GPIO_SPEED_10M:
+							GPIOx->CRL &= ~(2<<4*PINNUM);	//reset 2nd bit in MODE
+							GPIOx->CRL |=  (1<<4*PINNUM);	//set 1st bit in MODE
+							break;
+						case GPIO_SPEED_2M:
+							GPIOx->CRL &= ~(1<<4*PINNUM);	//set 2nd bit in MODE
+							GPIOx->CRL |=  (2<<4*PINNUM);	//reset 1st bit in MODE
+							break;
+						case GPIO_SPEED_5M:
+							GPIOx->CRL |=  (3<<4*PINNUM);	//set the two bits in MODE
+							break;
+					}
+				GPIOx->CRL &= ~(0X4<<4*PINNUM);   //reset 1st bit in CNF
+				GPIOx->CRL |=  (0X8<<4*PINNUM);   //set 2nd bit in CNF
+				break;
+
+			case GPIO_MODE_OUTPUT_AF_OD:
+				switch(PinConfig.GPIO_OUTPUT_SPEED)
+					{
+						case GPIO_SPEED_10M:
+							GPIOx->CRL &= ~(2<<4*PINNUM);	//reset 2nd bit in MODE
+							GPIOx->CRL |=  (1<<4*PINNUM);	//set 1st bit in MODE
+							break;
+						case GPIO_SPEED_2M:
+							GPIOx->CRL &= ~(1<<4*PINNUM);	//set 2nd bit in MODE
+							GPIOx->CRL |=  (2<<4*PINNUM);	//reset 1st bit in MODE
+							break;
+						case GPIO_SPEED_5M:
+							GPIOx->CRL |=  (3<<4*PINNUM);	//set the two bits in MODE
+							break;
+					}
+				GPIOx->CRL |= (0Xc<<4*PINNUM);   //set two bits in CNF
+				break;
+
+			case GPIO_MODE_INPUT_AF:
+				GPIOx->CRL &= ~(0X3<<4*PINNUM);	//reset two bits in MODE
+				GPIOx->CRL &= ~(0X8<<4*PINNUM);   //reset 2nd bit in CNF
+				GPIOx->CRL |=  (0X4<<4*PINNUM);   //set 1st bit in CNF
+				break;
+		}
+	}
+
+
+
+	//Port Configuration register high GPIOx_CRH -> Configure pin 8 to pin 15
+	else{
+		PINNUM = PINNUM - 8;
+		switch(PinConfig.GPIO_MODE)
+		{
+			case GPIO_MODE_ANALOG:
+				GPIOx->CRH &= ~(0X3<<4*PINNUM);	//reset two bits in MODE
+				GPIOx->CRH &= ~(0XC<<4*PINNUM);   //reset two bits in CNF
+				break;
+
+			case GPIO_MODE_INPUT_FLO:
+				GPIOx->CRH &= ~(0X3<<4*PINNUM);	//reset two bits in MODE
+				GPIOx->CRH &= ~(0X8<<4*PINNUM);   //reset 2nd bit in CNF
+				GPIOx->CRH |=  (0X4<<4*PINNUM);   //set 1st bit in CNF
+				break;
+
+			case GPIO_MODE_INPUT_PU:
+				GPIOx->CRH &= ~(0X3<<4*PINNUM);	//reset two bits in MODE
+				GPIOx->CRH &= ~(0X4<<4*PINNUM);   //reset 1st bit in CNF
+				GPIOx->CRH |=  (0X8<<4*PINNUM);   //set 2nd bit in CNF
+				break;
+
+			case GPIO_MODE_INPUT_PD:
+				GPIOx->CRH &= ~(0X3<<4*PINNUM);	//reset two bits in MODE
+				GPIOx->CRH &= ~(0X4<<4*PINNUM);   //reset 1st bit in CNF
+				GPIOx->CRH |=  (0X8<<4*PINNUM);   //set 2nd bit in CNF
+				break;
+
+			case GPIO_MODE_OUTPUT_PP:
+				switch(PinConfig.GPIO_OUTPUT_SPEED)
+				{
+					case GPIO_SPEED_10M:
+						GPIOx->CRH &= ~(2<<4*PINNUM);	//reset 2nd bit in MODE
+						GPIOx->CRH |=  (1<<4*PINNUM);	//set 1st bit in MODE
+						break;
+					case GPIO_SPEED_2M:
+						GPIOx->CRH &= ~(1<<4*PINNUM);	//set 2nd bit in MODE
+						GPIOx->CRH |=  (2<<4*PINNUM);	//reset 1st bit in MODE
+						break;
+					case GPIO_SPEED_5M:
+						GPIOx->CRH |=  (3<<4*PINNUM);	//set the two bits in MODE
+						break;
+				}
+				GPIOx->CRH &= ~(0XC<<4*PINNUM);   //reset two bits in CNF
+				break;
+
+			case GPIO_MODE_OUTPUT_OD:
+				switch(PinConfig.GPIO_OUTPUT_SPEED)
+				{
+					case GPIO_SPEED_10M:
+						GPIOx->CRH &= ~(2<<4*PINNUM);	//reset 2nd bit in MODE
+						GPIOx->CRH |=  (1<<4*PINNUM);	//set 1st bit in MODE
+						break;
+					case GPIO_SPEED_2M:
+						GPIOx->CRH &= ~(1<<4*PINNUM);	//set 2nd bit in MODE
+						GPIOx->CRH |=  (2<<4*PINNUM);	//reset 1st bit in MODE
+						break;
+					case GPIO_SPEED_5M:
+						GPIOx->CRH |=  (3<<4*PINNUM);	//set the two bits in MODE
+						break;
+				}
+				GPIOx->CRH &= ~(0X8<<4*PINNUM);   //reset 2nd bits in CNF
+				GPIOx->CRH |=  (0X4<<4*PINNUM);   //set 1st bits in CNF
+				break;
+
+			case GPIO_MODE_OUTPUT_AF_PP:
+				switch(PinConfig.GPIO_OUTPUT_SPEED)
+					{
+						case GPIO_SPEED_10M:
+							GPIOx->CRH &= ~(2<<4*PINNUM);	//reset 2nd bit in MODE
+							GPIOx->CRH |=  (1<<4*PINNUM);	//set 1st bit in MODE
+							break;
+						case GPIO_SPEED_2M:
+							GPIOx->CRH &= ~(1<<4*PINNUM);	//set 2nd bit in MODE
+							GPIOx->CRH |=  (2<<4*PINNUM);	//reset 1st bit in MODE
+							break;
+						case GPIO_SPEED_5M:
+							GPIOx->CRH |=  (3<<4*PINNUM);	//set the two bits in MODE
+							break;
+					}
+				GPIOx->CRH &= ~(0X4<<4*PINNUM);   //reset 1st bit in CNF
+				GPIOx->CRH |=  (0X8<<4*PINNUM);   //set 2nd bit in CNF
+				break;
+
+			case GPIO_MODE_OUTPUT_AF_OD:
+				switch(PinConfig.GPIO_OUTPUT_SPEED)
+					{
+						case GPIO_SPEED_10M:
+							GPIOx->CRH &= ~(2<<4*PINNUM);	//reset 2nd bit in MODE
+							GPIOx->CRH |=  (1<<4*PINNUM);	//set 1st bit in MODE
+							break;
+						case GPIO_SPEED_2M:
+							GPIOx->CRH &= ~(1<<4*PINNUM);	//set 2nd bit in MODE
+							GPIOx->CRH |=  (2<<4*PINNUM);	//reset 1st bit in MODE
+							break;
+						case GPIO_SPEED_5M:
+							GPIOx->CRH |=  (3<<4*PINNUM);	//set the two bits in MODE
+							break;
+					}
+				GPIOx->CRH |= (0Xc<<4*PINNUM);   //set two bits in CNF
+				break;
+
+			case GPIO_MODE_INPUT_AF:
+				GPIOx->CRH &= ~(0X3<<4*PINNUM);	//reset two bits in MODE
+				GPIOx->CRH &= ~(0X8<<4*PINNUM);   //reset 2nd bit in CNF
+				GPIOx->CRH |=  (0X4<<4*PINNUM);   //set 1st bit in CNF
+				break;
+		}
+	}
+}
+/* =================================================================
+ * @FN			- MCAL_GPIO_DeInit
+ * @Brief		- DeInitialize a GPIOx Whole peripheral
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @retval		- NONE
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+void MCAL_GPIO_DeInit(GPIO_TypeDef* GPIOx)
+{
+
+}
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_Read_PIN
+ * @Brief		- Read GPIOx Pin y and return the value
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @param(in)	- PinNumber: the number of pin to read @ref GPIO_PINS_define
+ * @retval		- The value of the pin "two values based on @ref GPIO_PIN_state"
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+uint8_t MCAL_GPIO_Read_PIN(GPIO_TypeDef* GPIOx ,uint16_t PinNumber)
+{
+
+}
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_Read_PORT
+ * @Brief		- Read GPIOx and return the value
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @retval		- The value of the Port
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+uint16_t MCAL_GPIO_Read_PORT(GPIO_TypeDef* GPIOx)
+{
+
+}
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_write_PIN
+ * @Brief		- Write a certain value to GPIOx Pin y
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @param(in)	- PinNumber: the number of pin to read @ref GPIO_PINS_define
+ * @param(in)	- Value: The value of the pin "two values based on @ref GPIO_PIN_state"
+ * @retval		- NONE
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+void MCAL_GPIO_Write_PIN(GPIO_TypeDef* GPIOx ,uint16_t PinNumber,uint8_t Value)
+{
+
+}
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_write_PIN
+ * @Brief		- Write a certain value to GPIOx
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @param(in)	- Value: The value of be written on the port (varies from 0x0000 to 0xFFFF)
+ * @retval		- NONE
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+void MCAL_GPIO_Write_PORT(GPIO_TypeDef* GPIOx ,uint16_t Value)
+{
+
+}
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_Toggle_PIN
+ * @Brief		- Toggle a certain GPIOx Pin y
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @param(in)	- PinNumber: the number of pin to read @ref GPIO_PINS_define
+ * @retval		- NONE
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+void MCAL_GPIO_Toggle_PIN(GPIO_TypeDef* GPIOx ,uint16_t PinNumber)
+{
+
+}
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_Lock_PIN
+ * @Brief		- Lock a certain GPIOx pin y and freeze the IO mechanism
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @param(in)	- PinNumber: the number of pin to read @ref GPIO_PINS_define
+ * @retval		- Return Values OK or Error for the Pin locking procedure @ref GPIO_PIN_LOCKING_STATUS_define
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+uint8_t MCAL_GPIO_Lock_PIN(GPIO_TypeDef* GPIOx ,uint16_t PinNumber)
+{
+
+}
+
+/* =================================================================
+ * @FN			- _FindPinNum
+ * @Brief		- Helper Function to return the pin number of the defines
+ * @param(in)	- PinNumber: the number of pin to read @ref GPIO_PINS_define
+ * @retval		- Return the number of the pin (0,1,2,3,4)
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+uint8_t _FindPinNum (uint16_t PinNumber)
+{
+	int counter=0;
+	while(PinNumber){
+		counter ++;
+		PinNumber = (PinNumber>>1);
+	}
+	return counter-1;
+}

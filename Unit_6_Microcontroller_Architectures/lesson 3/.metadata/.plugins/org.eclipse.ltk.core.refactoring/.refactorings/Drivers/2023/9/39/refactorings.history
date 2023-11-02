@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;Drivers/Stm32_F103C6_Drivers/inc/stm32f103x8.h&apos; to &apos;stm32f103x6.h&apos;" description="Rename resource &apos;stm32f103x8.h&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Stm32_F103C6_Drivers/inc/stm32f103x8.h" name="stm32f103x6.h" stamp="1695731361757" updateReferences="true"/>
+</session>

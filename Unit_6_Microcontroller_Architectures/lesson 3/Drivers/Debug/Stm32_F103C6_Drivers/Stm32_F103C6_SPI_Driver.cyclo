@@ -1,0 +1,8 @@
+../Stm32_F103C6_Drivers/Stm32_F103C6_SPI_Driver.c:47:7:MCAL_SPI_Init	8
+../Stm32_F103C6_Drivers/Stm32_F103C6_SPI_Driver.c:133:7:MCAL_SPI_DeInit	3
+../Stm32_F103C6_Drivers/Stm32_F103C6_SPI_Driver.c:163:7:MCAL_SPI_SendData	3
+../Stm32_F103C6_Drivers/Stm32_F103C6_SPI_Driver.c:191:8:MCAL_SPI_TX_RX	5
+../Stm32_F103C6_Drivers/Stm32_F103C6_SPI_Driver.c:225:7:MCAL_SPI_ReceiveData	3
+../Stm32_F103C6_Drivers/Stm32_F103C6_SPI_Driver.c:247:7:MCAL_SPI_GPIO_Set_Pins	11
+../Stm32_F103C6_Drivers/Stm32_F103C6_SPI_Driver.c:412:6:SPI1_IRQHandler	1
+../Stm32_F103C6_Drivers/Stm32_F103C6_SPI_Driver.c:424:6:SPI2_IRQHandler	1

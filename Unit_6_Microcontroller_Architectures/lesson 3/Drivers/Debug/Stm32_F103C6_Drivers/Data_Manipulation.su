@@ -1,0 +1,5 @@
+../Stm32_F103C6_Drivers/Data_Manipulation.c:22:6:_WriteByte	16	static
+../Stm32_F103C6_Drivers/Data_Manipulation.c:36:6:_WriteWord	16	static
+../Stm32_F103C6_Drivers/Data_Manipulation.c:51:6:_WriteHalfByte	24	static
+../Stm32_F103C6_Drivers/Data_Manipulation.c:80:6:_WriteHalfWord	16	static
+../Stm32_F103C6_Drivers/Data_Manipulation.c:97:6:_WriteNBits	32	static

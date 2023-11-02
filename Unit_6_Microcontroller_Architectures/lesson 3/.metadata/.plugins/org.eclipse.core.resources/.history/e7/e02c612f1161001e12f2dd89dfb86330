@@ -1,0 +1,96 @@
+/*
+ * Stm32_F103C6_GPIO_Driver.c
+ *
+ *  Created on: Sep 26, 2023
+ *      Author: omar pc
+ */
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_Init
+ * @Brief		- Initialize a GPIOx Pin Y According to Parameters in PinConfig
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @param(in)	- PinConfig: Structure where the configuration of the pins is stored.
+ * @retval		- NONE
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+#include "Stm32_F103C6_GPIO_Driver.h"
+
+void MCAL_GPIO_Init(GPIO_TypeDef* GPIOx , GPIO_PinConfig_t PinConfig)
+{
+
+}
+/* =================================================================
+ * @FN			- MCAL_GPIO_DeInit
+ * @Brief		- DeInitialize a GPIOx Whole peripheral
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @retval		- NONE
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+void MCAL_GPIO_DeInit(GPIO_TypeDef* GPIOx)
+{
+
+}
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_Read_PIN
+ * @Brief		- Read GPIOx Pin y and return the value
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @param(in)	- PinNumber: the number of pin to read @ref GPIO_PINS_define
+ * @retval		- The value of the pin "two values based on @ref GPIO_PIN_state"
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+uint8_t MCAL_GPIO_Read_PIN(GPIO_TypeDef* GPIOx ,uint16_t PinNumber)
+{
+
+}
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_Read_PORT
+ * @Brief		- Read GPIOx Pin y and return the value
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @retval		- The value of the Port
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+uint16_t MCAL_GPIO_Read_PORT(GPIO_TypeDef* GPIOx)
+{
+
+}
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_write_PIN
+ * @Brief		- Write a certain value to GPIOx Pin y
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @param(in)	- PinNumber: the number of pin to read @ref GPIO_PINS_define
+ * @param(in)	- Value: The value of the pin "two values based on @ref GPIO_PIN_state"
+ * @retval		- NONE
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+void MCAL_GPIO_Write_PIN(GPIO_TypeDef* GPIOx ,uint16_t PinNumber,uint8_t Value)
+{
+
+}
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_write_PIN
+ * @Brief		- Write a certain value to GPIOx Pin y
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @param(in)	- Value: The value of be written on the port (varies from 0x0000 to 0xFFFF)
+ * @retval		- NONE
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+void MCAL_GPIO_Write_PORT(GPIO_TypeDef* GPIOx ,uint16_t Value)
+{
+
+}

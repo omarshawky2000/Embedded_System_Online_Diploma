@@ -1,0 +1,35 @@
+/*@!Encoding:65001*/
+includes
+{
+  
+}
+
+variables
+{
+  int var_speed = 0;
+  message Speed_Val_message m_speed;
+}
+
+on start
+{
+  write("##########start ECU2 ###############");
+  
+}
+
+on message ACC_CMD_message
+{
+  if(this.ACC_ON.phys == 1)
+  {
+    if(var_speed == 255) var_speed =255;
+    else
+    var_speed++;
+  }
+  else
+  {
+    if(var_speed == 0) var_speed =0;
+    else
+    var_speed--;
+  }
+  m_speed.Speed.phys = var_speed;
+  output(m_speed);
+}

@@ -1,0 +1,433 @@
+/*
+ * Stm32_F103C6_GPIO_Driver.c
+ *
+ *  Created on: Sep 26, 2023
+ *      Author: omar pc
+ */
+ #include "Stm32_F103C6_GPIO_Driver.h"
+
+ //========================================================================
+ //								PRIVATE PROTOTYPES
+ //========================================================================
+ uint8_t _FindPinNum (uint16_t PinNumber);
+ void _WriteNBits (uint32_t* address , uint8_t offset , uint32_t nbits , uint8_t n );
+ void _WriteHalfWord (uint32_t* address , uint8_t offset , uint16_t hword);
+ void _WriteHalfByte (uint32_t* address , uint8_t offset , uint8_t hbyte);
+ void _WriteWord (uint32_t* address , uint32_t word);
+ void _WriteByte (uint32_t* address , uint8_t offset , uint8_t byte);
+ uint8_t _Get_CRLH_Position(uint16_t PinNumber);
+
+
+
+ /**================================================================
+  * @Fn				-MCAL_GPIO_Init
+  * @brief 			-Initializes the GPIOx PINy according to the specified parameters in the PinConfig
+  * @param [in] 	-GPIOx: where x can be (A..E depending on device used) to select the GPIO peripheral
+  * @param [in] 	-PinConfig pointer to a GPIO_PinConfig_t structure that contains
+  *         		 the configuration information for the specified GPIO PIN.
+  * @retval 		-none
+  * Note			-Stm32F103C6 MCU has GPIO A,B,C,D,E Modules
+  * 				 But LQFP48 Package has only GPIO A,B,PART of C/D exported as external PINS from the MCU
+  **================================================================
+  */
+
+ void MCAL_GPIO_Init (GPIO_TypeDef *GPIOx, GPIO_PinConfig_t PinConfig)
+ {
+
+ 	//Port configuration register low (GPIOx_CRL) Configure PINS from 0 >>> 7
+ 	//Port configuration register High (GPIOx_CRH) Configure PINS from 8 >>> 15
+ 	volatile uint32_t* configregister = NULL ;
+ 	uint8_t PIN_Config = 0 ;
+
+ 	configregister = (PinConfig.GPIO_PinNumber < GPIO_PIN_8 )?  &GPIOx->CRL : &GPIOx->CRH ;
+
+ 	//clear CNF8[1:0] MODE8[1:0]
+ 	(*configregister) &= ~(0xf << _Get_CRLH_Position(PinConfig.GPIO_PinNumber));
+
+ 	//if Pin is output
+ 	if (  (PinConfig.GPIO_MODE == GPIO_MODE_OUTPUT_AF_OD) || (PinConfig.GPIO_MODE == GPIO_MODE_OUTPUT_AF_PP) || (PinConfig.GPIO_MODE == GPIO_MODE_OUTPUT_OD) || (PinConfig.GPIO_MODE == GPIO_MODE_OUTPUT_PP) )
+ 	{
+ 		//Set  CNF8[1:0] MODE8[1:0]
+ 		PIN_Config = ( (((PinConfig.GPIO_MODE - 4 ) << 2) | (PinConfig.GPIO_OUTPUT_SPEED)) & 0x0f ) ;
+
+ 	}
+ 	//if pin is input
+ 	else //MODE =  00: Input mode (reset state)
+ 	{
+ 		if (  (PinConfig.GPIO_MODE == GPIO_MODE_INPUT_FLO) ||  (PinConfig.GPIO_MODE == GPIO_MODE_ANALOG))
+ 		{
+ 			//Set  CNF8[1:0] MODE8[1:0]00
+ 			PIN_Config = ( (((PinConfig.GPIO_MODE  ) << 2) | 0x0) & 0x0f ) ;
+
+ 		}else if (PinConfig.GPIO_MODE == GPIO_MODE_INPUT_AF) //Consider it as input floating
+ 		{
+ 			//Set  CNF8[1:0] MODE8[1:0]00
+ 			PIN_Config = ( (((GPIO_MODE_INPUT_FLO  ) << 2) | 0x0) & 0x0f ) ;
+ 		}
+ 		else //PU PD Input
+ 		{
+ 			PIN_Config = ( (((GPIO_MODE_INPUT_PU  ) << 2) | 0x0) & 0x0f ) ;
+
+ 			if (PinConfig.GPIO_MODE == GPIO_MODE_INPUT_PU)
+ 			{
+ 				//PxODR = 1 Input pull-up :Table 20. Port bit configuration table
+ 				GPIOx->ODR |= PinConfig.GPIO_PinNumber ;
+
+ 			}else
+ 			{
+ 				//PxODR = 1 Input pull-up :Table 20. Port bit configuration table
+ 				GPIOx->ODR &= ~(PinConfig.GPIO_PinNumber) ;
+ 			}
+
+
+ 		}
+
+ 	}
+ // write on the CRL or CRH
+ 	(*configregister) |=  ( (PIN_Config) << _Get_CRLH_Position(PinConfig.GPIO_PinNumber)   );
+
+ }
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_DeInit
+ * @Brief		- DeInitialize a GPIOx Whole peripheral
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @retval		- NONE
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+void MCAL_GPIO_DeInit(GPIO_TypeDef* GPIOx)
+{
+	//Write the reset values for GPIOx
+	GPIOx->CRL =  0x44444444;
+	GPIOx->CRH =  0x44444444;
+	GPIOx->ODR =  0x00;
+	GPIOx->IDR =  0x00;
+	GPIOx->BSRR = 0x00;
+	GPIOx->BRR =  0x00;
+	GPIOx->LCKR = 0x00;
+}
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_Read_PIN
+ * @Brief		- Read GPIOx Pin y and return the value
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @param(in)	- PinNumber: the number of pin to read @ref GPIO_PINS_define
+ * @retval		- The value of the pin "two values based on @ref GPIO_PIN_state"
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+uint8_t MCAL_GPIO_Read_PIN(GPIO_TypeDef* GPIOx ,uint16_t PinNumber)
+{
+	//Read a specific pin value
+	uint8_t PINNUM = _FindPinNum(PinNumber);
+	return ((GPIOx->IDR)&PinNumber)>>PINNUM;
+}
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_Read_PORT
+ * @Brief		- Read GPIOx and return the value
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @retval		- The value of the Port
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+uint16_t MCAL_GPIO_Read_PORT(GPIO_TypeDef* GPIOx)
+{
+	//Read the whole port at once
+	return (GPIOx->IDR)&0xFFFF;
+}
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_write_PIN
+ * @Brief		- Write a certain value to GPIOx Pin y
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @param(in)	- PinNumber: the number of pin to read @ref GPIO_PINS_define
+ * @param(in)	- Value: The value of the pin "two values based on @ref GPIO_PIN_state"
+ * @retval		- NONE
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+void MCAL_GPIO_Write_PIN(GPIO_TypeDef* GPIOx ,uint16_t PinNumber,uint8_t Value)
+{
+	switch (Value)
+	{
+		//If Value to be written is low
+		case GPIO_PIN_LOW:
+			//Reset the pin
+			(GPIOx->ODR) &= ~PinNumber;
+			break;
+		//If Value to be written is high
+		case GPIO_PIN_HIGH:
+			//Set the pin
+			(GPIOx->ODR) |= PinNumber;
+			break;
+		default:
+			break;
+	}
+
+}
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_write_PIN
+ * @Brief		- Write a certain value to GPIOx
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @param(in)	- Value: The value of be written on the port (varies from 0x0000 to 0xFFFF)
+ * @retval		- NONE
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+void MCAL_GPIO_Write_PORT(GPIO_TypeDef* GPIOx ,uint16_t Value)
+{
+	//Write the value on the whole port
+	(GPIOx->ODR) = (Value & 0xFFFF);
+}
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_Toggle_PIN
+ * @Brief		- Toggle a certain GPIOx Pin y
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @param(in)	- PinNumber: the number of pin to read @ref GPIO_PINS_define
+ * @retval		- NONE
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+void MCAL_GPIO_Toggle_PIN(GPIO_TypeDef* GPIOx ,uint16_t PinNumber)
+{
+	//Toggle the Pin using the given pin number
+	(GPIOx->ODR) ^= PinNumber;
+}
+
+/* =================================================================
+ * @FN			- MCAL_GPIO_Lock_PIN
+ * @Brief		- Lock a certain GPIOx pin y and freeze the IO mechanism
+ * @param(in)	- GPIOx: where x can be (A,B...E depending on device used) to select the GPIO peripheral
+ * @param(in)	- PinNumber: the number of pin to read @ref GPIO_PINS_define
+ * @retval		- Return Values OK or Error for the Pin locking procedure @ref GPIO_PIN_LOCKING_STATUS_define
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+uint8_t MCAL_GPIO_Lock_PIN(GPIO_TypeDef* GPIOx ,uint16_t PinNumber)
+{
+	//Write 1
+	(GPIOx->LCKR) |= PinNumber;
+	//Write 0
+	(GPIOx->LCKR) &= ~PinNumber;
+	//Write 1
+	(GPIOx->LCKR) |= PinNumber;
+	//Read 0
+	if((GPIOx->LCKR) & PinNumber);
+	//Read 1
+	if((GPIOx->LCKR) & PinNumber) return GPIO_PIN_LOCK_OK;
+	else return GPIO_PIN_LOCK_ERROR;
+}
+
+/* =================================================================
+ * @FN			- _FindPinNum
+ * @Brief		- Helper Function to return the pin number of the defines
+ * @param(in)	- PinNumber: the number of pin to read @ref GPIO_PINS_define
+ * @retval		- Return the number of the pin (0,1,2,3,4)
+ * Note-		- STM32F103C6 MCU has GPIO A , B , C , D , E Modules
+ * 				  but in LQFP48 Package has GPIO A , B , part of C and D exported to the external pins
+ * =================================================================
+ */
+uint8_t _FindPinNum (uint16_t PinNumber)
+{
+	int counter=0;
+	while(PinNumber){
+		counter ++;
+		PinNumber = (PinNumber>>1);
+	}
+	return counter-1;
+}
+/* =================================================================
+ * @FN			- _WriteByte
+ * @Brief		- Helper Function to write a byte at once in a register
+ * @param(in)	- Address: the base address of the register
+ * @param(in)	- Offset: the offset of the byte to write onto (0,1,2,3)
+ * @param(in)	- Byte: the byte to be written on the register
+ * @retval		- NONE
+ * Note-		- NONE
+ * =================================================================
+ */
+void _WriteByte (uint32_t* address , uint8_t offset , uint8_t byte)
+{
+    if(offset > 3){return;}
+    * ((uint8_t*)(address)+offset) = byte;
+}
+/* =================================================================
+ * @FN			- _WriteWord
+ * @Brief		- Helper Function to write a Word at once in a register
+ * @param(in)	- Address: the base address of the register
+ * @param(in)	- Word: the word to be written on the register
+ * @retval		- NONE
+ * Note-		- NONE
+ * =================================================================
+ */
+void _WriteWord (uint32_t* address , uint32_t word)
+{
+    *address = word;
+}
+
+/* =================================================================
+ * @FN			- _WriteHalfByte
+ * @Brief		- Helper Function to write a Word at once in a register
+ * @param(in)	- Address: the base address of the register
+ * @param(in)	- Offset: the offset of the half byte to write onto (0,1,2,3,4,5,6,7)
+ * @param(in)	- hbyte: the hbyte to be written on the register
+ * @retval		- NONE
+ * Note-		- NONE
+ * =================================================================
+ */
+void _WriteHalfByte (uint32_t* address , uint8_t offset , uint8_t hbyte)
+{
+    uint8_t counter = 0;
+	while(counter < 4)
+	{
+	   //safety
+	   if(hbyte>=0x10 || offset > 7){break;}
+
+	   if(hbyte&(1<<counter))
+	   {
+	       * address |= (1<<((offset*4)+counter));
+	   }
+	   else
+	   {
+	       * address &= ~(1<<((offset*4)+counter));
+	   }
+	   counter ++;
+	}
+}
+/* =================================================================
+ * @FN			- _WriteHalfWord
+ * @Brief		- Helper Function to write a Word at once in a register
+ * @param(in)	- Address: the base address of the register
+ * @param(in)	- Offset: the offset of the half word to write onto (0,1)
+ * @param(in)	- hword: the half word to be written on the register
+ * @retval		- NONE
+ * Note-		- NONE
+ * =================================================================
+ */
+void _WriteHalfWord (uint32_t* address , uint8_t offset , uint16_t hword)
+{
+    if(offset > 1){return;}
+    *((uint16_t*)(address)+offset) = hword;
+}
+
+/* =================================================================
+ * @FN			- _WriteNBits
+ * @Brief		- Helper Function to write n number of bits to a register at a certain offset
+ * @param(in)	- Address: the base address of the register
+ * @param(in)	- Offset: the offset of the byte to write onto (0,1,2,3)
+ * @param(in)	- Nbits: the bits written on the register
+ * @param(in)	- N: the number of bits to be written on the register
+ * @retval		- NONE
+ * Note-		- NONE
+ * =================================================================
+ */
+void _WriteNBits (uint32_t* address , uint8_t offset , uint32_t nbits , uint8_t n )
+{
+    uint8_t counter = 0;
+	while(counter < n)
+	{
+	   if(nbits&(1<<counter))
+	   {
+	       * address |= (1<<(offset+counter));
+	   }
+	   else
+	   {
+	       * address &= ~(1<<(offset+counter));
+	   }
+	   counter ++;
+	}
+}
+
+
+/* =================================================================
+ * @FN			- _Get_CRLH_Position
+ * @Brief		- Helper Function to return position of the pin
+ * @param(in)	- PinNumber : the pin number as specified in the standard
+ * @retval		- offset of the pin
+ * Note-		- NONE
+ * =================================================================
+*/
+uint8_t _Get_CRLH_Position(uint16_t PinNumber)
+{
+	switch (PinNumber)
+	{
+	case GPIO_PIN_0:
+		return 0 ;
+		break ;
+	case GPIO_PIN_1:
+		return 4 ;
+		break ;
+	case GPIO_PIN_2:
+		return 8 ;
+		break ;
+	case GPIO_PIN_3:
+		return 12 ;
+		break ;
+
+	case GPIO_PIN_4:
+		return 16 ;
+		break ;
+
+
+	case GPIO_PIN_5:
+		return 20 ;
+		break ;
+
+	case GPIO_PIN_6:
+		return 24 ;
+		break ;
+
+	case GPIO_PIN_7:
+		return 28 ;
+		break ;
+
+
+	case GPIO_PIN_8:
+		return 0 ;
+		break ;
+	case GPIO_PIN_9:
+		return 4 ;
+		break ;
+
+	case GPIO_PIN_10:
+		return 8 ;
+		break ;
+
+	case GPIO_PIN_11:
+		return 12 ;
+		break ;
+
+	case GPIO_PIN_12:
+		return 16 ;
+		break ;
+
+
+	case GPIO_PIN_13:
+		return 20 ;
+		break ;
+
+	case GPIO_PIN_14:
+		return 24 ;
+		break ;
+
+	case GPIO_PIN_15:
+		return 28 ;
+		break ;
+
+
+
+	}
+
+	return 0 ;
+}

@@ -1,0 +1,93 @@
+/*
+ * keypad.c
+ *
+ *  Created on: Oct 3, 2023
+ *      Author: omar pc
+ */
+#include "keypad.h"
+
+int Key_padRow[] = { R0, R1, R2, R3 }; //rows of the keypad
+int Key_padCol[] = { C0, C1, C2, C3 }; //columns
+char Key_padChars[4][4] = { {'/','9','8','7'} , {'X','6','5','4'} , {'-','3','2','1'} , {'+','=','0','N'} };
+void delay_mss(uint32_t time) {
+	uint32_t i, j;
+	for (i = 0; i < time; i++)
+		for (j = 0; j < 255; j++)
+			;
+}
+
+void Keypad_init() {
+//	DataDir_KEYPAD_PORT &= ~((1 << R0) | (1 << R1) | (1 << R2) | (1 << R3));
+//	DataDir_KEYPAD_PORT |= ((1 << C0) | (1 << C1) | (1 << C2) | (1 << C3));
+//	KEYPAD_PORT = 0xFF;
+	GPIO_PinConfig_t PinCfg;
+
+	PinCfg.GPIO_PinNumber = R0;
+	PinCfg.GPIO_MODE = GPIO_MODE_OUTPUT_PP;
+	PinCfg.GPIO_OUTPUT_SPEED = GPIO_SPEED_10M;
+	MCAL_GPIO_Init(KEYPAD_PORT, PinCfg);
+
+	PinCfg.GPIO_PinNumber = R1;
+	PinCfg.GPIO_MODE = GPIO_MODE_OUTPUT_PP;
+	PinCfg.GPIO_OUTPUT_SPEED = GPIO_SPEED_10M;
+	MCAL_GPIO_Init(KEYPAD_PORT, PinCfg);
+
+	PinCfg.GPIO_PinNumber = R2;
+	PinCfg.GPIO_MODE = GPIO_MODE_OUTPUT_PP;
+	PinCfg.GPIO_OUTPUT_SPEED = GPIO_SPEED_10M;
+	MCAL_GPIO_Init(KEYPAD_PORT, PinCfg);
+
+	PinCfg.GPIO_PinNumber = R3;
+	PinCfg.GPIO_MODE = GPIO_MODE_OUTPUT_PP;
+	PinCfg.GPIO_OUTPUT_SPEED = GPIO_SPEED_10M;
+	MCAL_GPIO_Init(KEYPAD_PORT, PinCfg);
+
+	PinCfg.GPIO_PinNumber = C0;
+	PinCfg.GPIO_MODE = GPIO_MODE_INPUT_PU;
+	PinCfg.GPIO_OUTPUT_SPEED = GPIO_SPEED_10M;
+	MCAL_GPIO_Init(KEYPAD_PORT, PinCfg);
+
+	PinCfg.GPIO_PinNumber = C1;
+	PinCfg.GPIO_MODE = GPIO_MODE_INPUT_PU;
+	PinCfg.GPIO_OUTPUT_SPEED = GPIO_SPEED_10M;
+	MCAL_GPIO_Init(KEYPAD_PORT, PinCfg);
+
+	PinCfg.GPIO_PinNumber = C2;
+	PinCfg.GPIO_MODE = GPIO_MODE_INPUT_PU;
+	PinCfg.GPIO_OUTPUT_SPEED = GPIO_SPEED_10M;
+	MCAL_GPIO_Init(KEYPAD_PORT, PinCfg);
+
+	PinCfg.GPIO_PinNumber = C3;
+	PinCfg.GPIO_MODE = GPIO_MODE_INPUT_PU;
+	PinCfg.GPIO_OUTPUT_SPEED = GPIO_SPEED_10M;
+	MCAL_GPIO_Init(KEYPAD_PORT, PinCfg);
+	MCAL_GPIO_Write_PORT(KEYPAD_PORT, 0x1E0);
+
+}
+
+char Keypad_getkey() {
+	int i = 0 ;
+	int j = 0 ;
+	while(~(MCAL_GPIO_Read_PORT(KEYPAD_PORT))& 0x1E0)
+	{
+		int column = (~(MCAL_GPIO_Read_PORT(KEYPAD_PORT)& 0x1E0)>>5);
+		while((column>>i)>0) i++;
+		i--;
+		//set all GPIO column pins to pull down
+		GPIO_PinConfig_t PinCfg;
+		PinCfg.GPIO_PinNumber = (MCAL_GPIO_Read_PORT(KEYPAD_PORT))& 0x1E0;
+		PinCfg.GPIO_MODE = GPIO_MODE_INPUT_PD;
+		PinCfg.GPIO_OUTPUT_SPEED = GPIO_SPEED_10M;
+		MCAL_GPIO_Init(KEYPAD_PORT, PinCfg);
+		for(j=0 ; j<4;j++)
+		{
+			//Set the row to high accordingly
+			MCAL_GPIO_Write_PIN(KEYPAD_PORT,(1<<j),GPIO_PIN_HIGH);
+			if(MCAL_GPIO_Read_PIN(KEYPAD_PORT,PinCfg.GPIO_PinNumber)  == GPIO_PIN_HIGH) break;
+		}
+		Keypad_init();
+		return Key_padChars[j][i];
+	}
+	return 'A';
+}
+

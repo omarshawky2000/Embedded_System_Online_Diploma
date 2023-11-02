@@ -1,0 +1,3 @@
+../HAL/HAL_BLDC_driver.c:44:7:HAL_BLDC_Init	24	static
+../HAL/HAL_BLDC_driver.c:111:7:HAL_BLDC_Write_HB_States	16	static
+../HAL/HAL_BLDC_driver.c:228:7:HAL_BLDC_Write_Vector	16	static
